@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
 from datetime import datetime
+from typing import List
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class QueryRequest(BaseModel):

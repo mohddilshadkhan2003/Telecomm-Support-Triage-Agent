@@ -1,69 +1,40 @@
 # Telecom Support Triage Agent
 
-A professional FastAPI-based telecom support triage platform designed to classify incoming customer queries, prioritize issues, and route them into an efficient support workflow.
+A production-grade telecom support triage platform built with FastAPI to classify customer issues, rank priorities, and streamline support operations.
 
 ## Overview
 
-Telecom support teams often receive large volumes of customer messages spanning billing, connectivity, service requests, and device issues. This application helps automate the first layer of triage by:
+This project helps telecom teams reduce manual triage effort by automatically analyzing incoming support queries, classifying them into meaningful categories, and identifying their urgency level. It can be used as a modern support queue foundation for internal operations or a prototype for a larger customer support platform.
 
-- identifying the likely issue category,
-- assigning business urgency based on keywords,
-- generating an automated support response,
-- storing tickets for human follow-up and team operations.
+## Key capabilities
 
-The result is a cleaner support queue, faster response times, and better visibility for service agents.
-
-## Why this project matters
-
-This solution helps telecom organizations reduce manual ticket sorting and improves operational efficiency by:
-
-- shortening the time to first response,
-- ensuring critical incidents are identified early,
-- organizing support work by priority,
-- creating a reusable triage workflow that can evolve into a larger customer support system.
-
-## Architecture at a glance
-
-```text
-Customer Query
-      |
-      v
-FastAPI API
-      |
-      +--> Triage Engine
-      |       - category detection
-      |       - priority analysis
-      |       - automated response selection
-      |
-      +--> Ticket Database
-              - stores ticket data
-              - supports dashboard reporting
-```
-
-## Core features
-
-- Automatic ticket categorization
-- Priority scoring for critical and high-impact incidents
-- Automated response generation
-- Support queue dashboard
-- Ticket status tracking
-- Config-driven triage rules via YAML
-- FastAPI Swagger and ReDoc documentation
-- Clean, extensible Python service structure
+- Automated support query categorization
+- Urgency detection for critical and high-impact incidents
+- Ticket generation with human-readable responses
+- Support dashboard with queue summary metrics
+- Persistent storage using SQLite
+- Docker-ready deployment setup
+- API documentation through FastAPI
 
 ## Tech stack
 
-- Python 3.10+
+- Python 3.11+
 - FastAPI
 - Pydantic
+- SQLite
 - Uvicorn
-- YAML configuration
-- Pytest for verification
+- Pytest
+- Docker and Docker Compose
 
-## Repository structure
+## Project structure
 
 ```text
 .
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+├── README.md
 ├── finalproject/
 │   ├── app/
 │   │   ├── __init__.py
@@ -73,12 +44,13 @@ FastAPI API
 │   │   └── triage_engine.py
 │   ├── config/
 │   │   └── settings.yaml
+│   ├── data/
+│   │   └── .gitkeep
 │   ├── tests/
 │   │   └── test_api.py
 │   ├── requirements.txt
 │   ├── run.py
 │   └── README.md
-├── README.md
 ├── TELECOMM LLD.pdf
 ├── TELECOMM Project HLD.pdf
 ├── Telecomm Support Triage Report.pdf
@@ -86,6 +58,8 @@ FastAPI API
 ```
 
 ## Quick start
+
+### Local development
 
 ```bash
 cd finalproject
@@ -95,24 +69,42 @@ pip install -r requirements.txt
 python run.py
 ```
 
-Once running, the service is available at:
+### Docker
+
+```bash
+docker-compose up --build
+```
+
+Then visit:
 
 - http://localhost:8000
 - http://localhost:8000/docs
 - http://localhost:8000/redoc
+
+## Configuration
+
+The triage rules and responses are controlled in:
+
+`finalproject/config/settings.yaml`
+
+This file defines:
+
+- category mappings
+- priority keywords
+- automated support responses
 
 ## API endpoints
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | / | Service overview |
-| GET | /health | Health check |
-| POST | /submit_query | Submit a customer query for triage |
-| GET | /agent_dashboard | View the priority queue |
-| GET | /tickets/{ticket_id} | Fetch a specific ticket |
+| GET | /health | Health status |
+| POST | /submit_query | Submit triage request |
+| GET | /agent_dashboard | View ticket queue and summary |
+| GET | /tickets/{ticket_id} | Fetch one ticket |
 | PATCH | /tickets/{ticket_id}/status | Update ticket status |
 
-## Example: submit a query
+## Example request
 
 ```bash
 curl -X POST "http://localhost:8000/submit_query" \
@@ -142,29 +134,6 @@ curl -X POST "http://localhost:8000/submit_query" \
 }
 ```
 
-## Dashboard behavior
-
-The dashboard returns a summary alongside the ticket list, including:
-
-- total tickets
-- open tickets
-- critical ticket count
-- high priority count
-- medium priority count
-- low priority count
-
-This gives team leads a fast operational picture of current support pressure.
-
-## Configuration
-
-The triage behavior is driven by `finalproject/config/settings.yaml`. This allows you to adjust:
-
-- keyword categories,
-- priority rules,
-- automated response messages.
-
-This makes the system easy to customize for different telecom operations or brand requirements.
-
 ## Testing
 
 ```bash
@@ -172,26 +141,17 @@ cd finalproject
 pytest -q
 ```
 
-## Future enhancements
+## Production roadmap
 
-This project is already a strong foundation for further growth, including:
+This solution is designed to evolve into a stronger telecom operations platform with:
 
-- SQLite or PostgreSQL persistence,
-- authentication and role-based agent access,
-- a frontend dashboard using React or Streamlit,
-- analytics and SLA monitoring,
-- integration with CRM and ticketing systems.
-
-## License
-
-This project is intended for educational and operational prototyping use. If you plan to deploy it in production, review your organization’s security, data handling, and compliance requirements first.
+- SQLite/PostgreSQL persistence for enterprise workloads
+- authentication and role-based access
+- customer and agent dashboards
+- CRM or ticketing system integrations
+- analytics and SLA monitoring
+- alerting and escalation workflows
 
 ## Summary
 
-The Telecom Support Triage Agent combines automated issue classification, prioritization, and ticketing into a compact and professional support workflow. It is designed to help telecom teams act faster, reduce manual routing effort, and make support operations more structured and efficient.
-
-
-""" 
-    },
-    {
-      "content": "# Telecom Support Triage Agent\n\nA production-style support triage API for telecom customer support teams.\n\n## Overview\n\nThis service accepts customer queries, identifies the likely support category, evaluates urgency, generates a response, and creates a ticket for resolution tracking. It is built with FastAPI and is designed to be quick to run, easy to extend, and useful in operational support environments.\n\n## Features\n\n- Query classification for network, billing, device, and service issues\n- Automatic priority scoring\n- Ticket creation and dashboard retrieval\n- Health and service status endpoints\n- YAML-driven configuration for triage rules\n- Swagger documentation\n\n## Project structure\n\n```text\nfinalproject/\n├── app/\n│   ├── __init__.py\n│   ├── database.py\n│   ├── main.py\n│   ├── models.py\n│   └── triage_engine.py\n├── config/\n│   └── settings.yaml\n├── tests/\n│   └── test_api.py\n├── requirements.txt\n├── run.py\n└── README.md\n```\n\n## Installation\n\n```bash\ncd finalproject\npython -m venv venv\nsource venv/bin/activate\npip install -r requirements.txt\npython run.py\n```\n\n## Usage\n\nOpen the API docs at:\n\n- http://localhost:8000/docs\n\nExample request:\n\n```bash\ncurl -X POST \"http://localhost:8000/submit_query\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"customer_id\": \"CUST-12345\",\n    \"customer_name\": \"John Doe\",\n    \"query_text\": \"My internet is completely down and my business is losing money!\"\n  }'\n```\n\n## Testing\n\n```bash\npytest -q\n```\n\n## Notes\n\nThe logic is intentionally simple and configurable so it can be expanded for enterprise telecom operations, CRM integrations, and agent dashboards.\n"
+This repo is now structured as a more professional, maintainable, and deployable telecom triage service that models real operational support workflows while staying lightweight and developer-friendly.
