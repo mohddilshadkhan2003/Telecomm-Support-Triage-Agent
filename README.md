@@ -1,138 +1,101 @@
 # Telecom Support Triage Agent
 
-A production-grade telecom support triage platform built with FastAPI to classify customer issues, rank priorities, and streamline support operations.
+A secure, database-backed telecom support operations platform with automated triage, a live web dashboard, authentication, analytics, and containerized deployment.
 
-## Overview
+## Product capabilities
 
-This project helps telecom teams reduce manual triage effort by automatically analyzing incoming support queries, classifying them into meaningful categories, and identifying their urgency level. It can be used as a modern support queue foundation for internal operations or a prototype for a larger customer support platform.
+| Capability | Included |
+|---|---:|
+| Rule-based query classification | Yes |
+| Priority scoring and escalation | Yes |
+| SQLite persistence | Yes |
+| Authenticated agent dashboard | Yes |
+| Admin JWT authentication | Yes |
+| Queue and status management | Yes |
+| Database-backed analytics | Yes |
+| Docker production runtime | Yes |
+| CRM integration boundary | Webhook-ready |
 
-## Key capabilities
-
-- Automated support query categorization
-- Urgency detection for critical and high-impact incidents
-- Ticket generation with human-readable responses
-- Support dashboard with queue summary metrics
-- Persistent storage using SQLite
-- Docker-ready deployment setup
-- API documentation through FastAPI
-
-## Tech stack
-
-- Python 3.11+
-- FastAPI
-- Pydantic
-- SQLite
-- Uvicorn
-- Pytest
-- Docker and Docker Compose
-
-## Project structure
+## Architecture
 
 ```text
-.
-├── Dockerfile
-├── docker-compose.yml
-├── .env.example
-├── .gitignore
-├── README.md
-├── finalproject/
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── database.py
-│   │   ├── main.py
-│   │   ├── models.py
-│   │   └── triage_engine.py
-│   ├── config/
-│   │   └── settings.yaml
-│   ├── data/
-│   │   └── .gitkeep
-│   ├── tests/
-│   │   └── test_api.py
-│   ├── requirements.txt
-│   ├── run.py
-│   └── README.md
-├── TELECOMM LLD.pdf
-├── TELECOMM Project HLD.pdf
-├── Telecomm Support Triage Report.pdf
-└── .gitignore
+Customer / CRM webhook
+        |
+        v
+FastAPI service ── JWT authentication ── Agent dashboard
+        |
+        +── TriageEngine (config/settings.yaml)
+        +── TicketDatabase (SQLite)
+        +── Analytics API
+        +── CRM integration boundary
 ```
 
-## Quick start
-
-### Local development
+## Run locally
 
 ```bash
 cd finalproject
-python -m venv venv
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+cd ..
+cp .env.example .env
+# Set TRIAGE_SECRET_KEY and ADMIN_PASSWORD in .env
+cd finalproject
 python run.py
 ```
 
-### Docker
+Open `/dashboard` for the web control center, `/docs` for the API explorer, and `/redoc` for reference documentation.
+
+## Run with Docker
 
 ```bash
-docker-compose up --build
+cp .env.example .env
+# Set secure values in .env
+docker compose up -d --build
+docker compose logs -f telecom-triage
 ```
 
-Then visit:
+The container exposes port `8000` and persists SQLite data in the `triage-data` Docker volume.
 
-- http://localhost:8000
-- http://localhost:8000/docs
-- http://localhost:8000/redoc
+## Authentication
 
-## Configuration
+The dashboard uses an administrator JWT. Configure credentials through environment variables:
 
-The triage rules and responses are controlled in:
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD`
+- `TRIAGE_SECRET_KEY`
+- `TOKEN_EXPIRE_MINUTES`
 
-`finalproject/config/settings.yaml`
+Never commit `.env` or production secrets. The default values are development placeholders and must be changed before deployment.
 
-This file defines:
+Get a token through `POST /auth/token`, then send it as `Authorization: Bearer <token>` to protected endpoints.
 
-- category mappings
-- priority keywords
-- automated support responses
+## API surface
 
-## API endpoints
+| Method | Endpoint | Auth | Purpose |
+|---|---|---|---|
+| GET | `/health` | No | Container health check |
+| POST | `/auth/token` | No | Issue an access token |
+| POST | `/submit_query` | No | Create and triage a ticket |
+| GET | `/agent_dashboard` | Yes | Queue and summary metrics |
+| GET | `/analytics` | Yes | Category, priority, and status analytics |
+| GET | `/tickets/{ticket_id}` | Yes | Retrieve a ticket |
+| PATCH | `/tickets/{ticket_id}/status` | Yes | Update `open`, `in_progress`, `resolved`, or `closed` |
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| GET | / | Service overview |
-| GET | /health | Health status |
-| POST | /submit_query | Submit triage request |
-| GET | /agent_dashboard | View ticket queue and summary |
-| GET | /tickets/{ticket_id} | Fetch one ticket |
-| PATCH | /tickets/{ticket_id}/status | Update ticket status |
+## CRM and ticketing integration
 
-## Example request
+The service is intentionally integration-friendly: external CRM systems can submit tickets to `/submit_query`, and can consume the returned `ticket_id`, priority, category, and automated response. For a production connector, place a small adapter in `finalproject/app/integrations/` that maps CRM webhooks to `QueryRequest` and sends status changes back to the provider. Keep provider credentials in environment variables and make outbound calls asynchronous with retries and idempotency keys.
+
+## Operations
 
 ```bash
-curl -X POST "http://localhost:8000/submit_query" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "customer_id": "CUST-12345",
-    "customer_name": "John Doe",
-    "query_text": "My internet is completely down and my business is losing money!"
-  }'
+make up       # build and start
+make logs     # follow logs
+make stop     # stop services
+make backup   # export a SQLite SQL backup
 ```
 
-## Example response
-
-```json
-{
-  "ticket_id": "TKT-A1B2C3D4",
-  "customer_id": "CUST-12345",
-  "customer_name": "John Doe",
-  "query_text": "My internet is completely down and my business is losing money!",
-  "category": "network_issue",
-  "priority": "critical",
-  "priority_score": 100,
-  "automated_response": "Your case has been escalated to the emergency support team. A specialist will contact you within 5 minutes.",
-  "status": "open",
-  "created_at": "2026-09-21T12:00:00",
-  "updated_at": "2026-09-21T12:00:00"
-}
-```
+For production, place a TLS reverse proxy in front of the service, restrict network access to `/docs`, rotate the JWT secret, use PostgreSQL for multi-instance deployments, and add centralized logs/metrics.
 
 ## Testing
 
@@ -141,17 +104,13 @@ cd finalproject
 pytest -q
 ```
 
-## Production roadmap
+## Repository layout
 
-This solution is designed to evolve into a stronger telecom operations platform with:
-
-- SQLite/PostgreSQL persistence for enterprise workloads
-- authentication and role-based access
-- customer and agent dashboards
-- CRM or ticketing system integrations
-- analytics and SLA monitoring
-- alerting and escalation workflows
-
-## Summary
-
-This repo is now structured as a more professional, maintainable, and deployable telecom triage service that models real operational support workflows while staying lightweight and developer-friendly.
+```text
+finalproject/app/       API, authentication, persistence, triage engine, dashboard assets
+finalproject/config/    Configurable categories, priorities, and responses
+finalproject/tests/     API regression tests
+Dockerfile              Production container image
+docker-compose.yml      Persistent local/production-style deployment
+Makefile                Operational shortcuts
+```

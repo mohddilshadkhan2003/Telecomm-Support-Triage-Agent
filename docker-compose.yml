@@ -1,13 +1,17 @@
-FROM python:3.11-slim
+services:
+  telecom-triage:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - triage-data:/app/finalproject/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
-WORKDIR /app
-
-COPY finalproject/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY finalproject ./finalproject
-
-WORKDIR /app/finalproject
-EXPOSE 8000
-
-CMD ["python", "run.py"]
+volumes:
+  triage-data:

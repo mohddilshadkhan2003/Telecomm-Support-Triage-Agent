@@ -1,4 +1,11 @@
-APP_NAME=Telecom Support Triage Agent
-APP_ENV=development
-APP_PORT=8000
-DATABASE_PATH=finalproject/data/triage.db
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.db
+*.sqlite3
+.vscode/
+.idea/
+.DS_Store
