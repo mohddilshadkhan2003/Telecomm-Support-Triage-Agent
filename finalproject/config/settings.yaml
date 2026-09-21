@@ -1,48 +1,84 @@
-# Telecom Support Triage Configurations
-
+# Telecom Support Triage Configuration
 categories:
   network_issue:
     - "no signal"
+    - "dropped call"
     - "dropped calls"
     - "internet down"
     - "slow speed"
     - "outage"
+    - "weak signal"
+    - "cannot connect"
+    - "connection lost"
+    - "network failure"
+
   billing:
     - "overcharged"
     - "bill"
     - "invoice"
     - "payment"
     - "refund"
+    - "charge"
+    - "charged incorrectly"
+    - "balance"
+    - "credit"
+
   device_support:
     - "sim card"
     - "broken phone"
     - "activation"
     - "upgrade"
+    - "phone not working"
+    - "device issue"
+    - "replacement phone"
+    - "handset"
+
+  service_request:
+    - "plan change"
+    - "new line"
+    - "cancel service"
+    - "transfer"
+    - "move address"
+    - "service request"
+    - "port number"
 
 priority_keywords:
   critical:
     - "emergency"
     - "business down"
-    - "police"
     - "hospital"
-    - "lawsuit"
+    - "police"
+    - "911"
+    - "safety risk"
+    - "life threatening"
+
   high:
     - "outage"
     - "no signal"
+    - "disconnect"
     - "disconnected completely"
+    - "internet down"
     - "overcharged"
+    - "critical"
+
   medium:
     - "slow speed"
     - "dropped calls"
     - "upgrade"
+    - "payment issue"
+    - "sim card"
+    - "device issue"
+
   low:
     - "information"
     - "how to"
     - "bill explanation"
+    - "faq"
+    - "general inquiry"
 
 automated_responses:
-  critical: "Your query has been escalated to our emergency response team. An agent will contact you within 5 minutes."
-  high: "We have marked your issue as high priority. Our technical team is looking into it and will update you shortly."
-  medium: "Thank you for reaching out. We have logged your request and an agent will assist you soon."
-  low: "Thank you for your query. You can also check our FAQ section while you wait for our support team to respond."
+  critical: "Your case has been escalated to the emergency support team. A specialist will contact you within 5 minutes."
+  high: "Your issue has been marked as high priority. Our technical team is actively investigating and will update you shortly."
+  medium: "Thank you for reaching out. We have logged your request and a support agent will assist you soon."
+  low: "Thank you for your query. Please review our FAQ while our support team continues to work on your request."
   default: "Thank you for contacting Telecom Support. We will get back to you shortly."

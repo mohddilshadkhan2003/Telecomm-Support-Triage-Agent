@@ -1,0 +1,51 @@
+# Telecom Support Triage Agent
+
+This repository contains a professional telecom support triage API designed to classify support queries, prioritize customer issues, and route them into an operational queue.
+
+## Overview
+The project is built with FastAPI and follows a small but scalable service structure. It accepts customer support queries, detects the likely issue category, ranks urgency, prepares an automated response, and stores the ticket for agent review.
+
+## Project structure
+```text
+.
+├── finalproject/
+│   ├── app/
+│   ├── config/
+│   ├── requirements.txt
+│   ├── run.py
+│   ├── README.md
+│   └── tests/
+├── README.md
+├── TELECOMM LLD.pdf
+├── TELECOMM Project HLD.pdf
+└── Telecomm Support Triage Report.pdf
+```
+
+## Getting started
+```bash
+cd finalproject
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python run.py
+```
+
+The API will be available at:
+- http://localhost:8000
+- http://localhost:8000/docs
+
+## Core improvements made
+- Fixed config path resolution for reliable startup from any location
+- Corrected ticket model and API response payloads
+- Added customer name tracking and dashboard summary logic
+- Added health endpoint and service status monitoring
+- Improved validation for invalid input data
+- Added production-friendly API metadata and route structure
+- Added tests for stability and regression prevention
+- Added professional documentation and repo structure
+
+## Testing
+```bash
+cd finalproject
+pytest -q
+```
