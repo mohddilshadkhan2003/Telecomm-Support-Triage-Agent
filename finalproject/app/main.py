@@ -1,22 +1,34 @@
+from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Form, HTTPException, Request, status
-from fastapi.responses import HTMLResponse
+from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from .auth import ADMIN_USERNAME, TOKEN_MINUTES, authenticate, create_access_token, current_user, require_admin
+from .auth import current_user, require_admin
 from .database import db
 from .models import DashboardResponse, LoginRequest, QueryRequest, TicketResponse, TokenResponse
 from .triage_engine import TriageEngine
 
-app = FastAPI(title="Telecom Support Triage Agent", description="Secure telecom support triage and operations platform.", version="3.0.0")
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+BASE_DIR = Path(__file__).resolve().parent
+app = FastAPI(
+    title="Telecom Support Triage Agent",
+    description="Secure telecom support triage and operations platform.",
+    version="3.0.0",
+)
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 engine = TriageEngine()
 
 
 @app.get("/", summary="Service overview")
 async def root():
-    return {"service": "Telecom Support Triage Agent", "status": "online", "version": "3.0.0", "documentation_url": "/docs", "dashboard_url": "/dashboard"}
+    return {
+        "service": "Telecom Support Triage Agent",
+        "status": "online",
+        "version": "3.0.0",
+        "documentation_url": "/docs",
+        "dashboard_url": "/dashboard",
+    }
 
 
 @app.get("/health")
@@ -25,11 +37,16 @@ async def health_check():
 
 
 @app.post("/auth/token", response_model=TokenResponse, summary="Create an admin access token")
-async def login(form: Annotated[LoginRequest, Depends()]):
-    role = authenticate(form.username, form.password)
+async def login(payload: LoginRequest):
+    from .auth import ADMIN_PASSWORD, ADMIN_USERNAME, TOKEN_MINUTES, authenticate, create_access_token
+
+    role = authenticate(payload.username, payload.password)
     if role is None:
         raise HTTPException(status_code=401, detail="Invalid username or password")
-    return TokenResponse(access_token=create_access_token(form.username, role), expires_in_minutes=TOKEN_MINUTES)
+    return TokenResponse(
+        access_token=create_access_token(payload.username, role),
+        expires_in_minutes=TOKEN_MINUTES,
+    )
 
 
 @app.post("/submit_query", response_model=TicketResponse, status_code=201)
@@ -44,7 +61,7 @@ async def get_triage_queue(user: Annotated[dict, Depends(current_user)]):
 
 
 @app.get("/analytics")
-async def analytics(user: Annotated[dict, Depends(current_user)]):
+async def analytics(user: Annotated[dict, Depends(require_admin)]):
     return db.analytics()
 
 
@@ -69,4 +86,4 @@ async def update_ticket_status(ticket_id: str, status_value: str, user: Annotate
 
 @app.get("/dashboard", response_class=HTMLResponse, include_in_schema=False)
 async def dashboard(request: Request):
-    return HTMLResponse((request.app.state.dashboard_html if hasattr(request.app.state, "dashboard_html") else open("app/static/dashboard.html", encoding="utf-8").read()))
+    return FileResponse(BASE_DIR / "static" / "dashboard.html")

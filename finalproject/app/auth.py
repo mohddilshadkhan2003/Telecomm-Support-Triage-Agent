@@ -19,7 +19,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 def create_access_token(username: str, role: str) -> str:
     now = datetime.now(timezone.utc)
-    payload = {"sub": username, "role": role, "iat": now, "exp": now + timedelta(minutes=TOKEN_MINUTES)}
+    payload = {
+        "sub": username,
+        "role": role,
+        "iat": int(now.timestamp()),
+        "exp": int((now + timedelta(minutes=TOKEN_MINUTES)).timestamp()),
+    }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
@@ -30,7 +35,11 @@ def authenticate(username: str, password: str) -> str | None:
 
 
 def current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> dict:
-    credentials_error = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token", headers={"WWW-Authenticate": "Bearer"})
+    credentials_error = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         if not payload.get("sub") or not payload.get("role"):
